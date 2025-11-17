@@ -1,9 +1,9 @@
 
-Log Server
+# Log Server
 
 A high-performance log server that receives log messages from CLI loggers on the same machine via TCP and gRPC protocols, with file system storage and log rotation.
 
-Features
+# Features
 
 Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021)
 Protocol Flexibility: gRPC can be disabled with --only_tcp command line parameter
@@ -14,7 +14,7 @@ Rotating Logs: Maintains 10 files of 10MB each
 Binary Protocols: Efficient message serialization using Cap'n Proto and Protocol Buffers
 Architecture
 
-Data Flow
+# Data Flow
 
 text
 TCP Clients (Binary/capnp) ───┐
@@ -22,7 +22,7 @@ TCP Clients (Binary/capnp) ───┐
 gRPC Clients (Protobuf) ──────┘
 Server Processing Layers
 
-Client Interfaces
+# Client Interfaces
 
 TCP Clients: Binary protocol with length-prefixed Cap'n Proto messages
 gRPC Clients: HTTP/2 with Protocol Buffers serialization
@@ -43,7 +43,7 @@ Retry logic (3 attempts with delays)
 File system output with rotation
 Installation
 
-Prerequisites
+# Prerequisites
 
 Rust toolchain (latest stable version)
 Protocol Buffer compiler (for gRPC support)
@@ -55,7 +55,7 @@ cd log_server
 cargo build --release
 Usage
 
-Basic Usage
+# Basic Usage
 
 bash
 ./log_server
@@ -67,7 +67,8 @@ Option	Description	Default Value
 --port	TCP port	4020
 --grpc_port	gRPC port	4021
 --tcp_only	Disable gRPC interface	false
-Examples
+
+# Examples
 
 Start with default settings:
 
@@ -92,7 +93,8 @@ TCP Protocol
 Port: 4020 (configurable)
 Format: Length-prefixed binary messages
 Serialization: Cap'n Proto
-Message Structure: [4-byte length][capnp message]
+Message Structure: [4-byte length][capnp message] (will be changed soon with a common socket object)
+
 gRPC Protocol
 
 Port: 4021 (configurable)
@@ -109,6 +111,7 @@ _main.log.0    # Most recent rotated file
 _main.log.1    # Older rotated file
 ...
 _main.log.9    # Oldest rotated file
+
 Rotation Policy
 
 File Size: 10MB per file
@@ -126,7 +129,7 @@ Send length-prefixed Cap'n Proto messages
 Close connection when done
 gRPC Clients (JavaScript/TypeScript)
 
-Example using gRPC-Web:
+# Example using gRPC-Web:
 
 javascript
 // JavaScript example
@@ -140,7 +143,8 @@ Rust (TCP and gRPC)
 JavaScript/TypeScript (gRPC)
 Python (TCP)
 Go (TCP)
-Performance Characteristics
+
+# Performance Characteristics
 
 High Throughput: Batched writing with dynamic batching
 Ordering Guarantees: Atomic sequence numbers ensure message order
@@ -150,14 +154,14 @@ Monitoring
 
 Log Files
 
-Check the server's own logs in the rotating files for:
+# Check the server's own logs in the rotating files for:
 
 Connection statistics
 Error conditions
 Performance metrics
 Health Checking
 
-TCP Health Check:
+# TCP Health Check:
 
 bash
 echo "health" | nc localhost 4020
@@ -172,28 +176,6 @@ Common Issues
 Port Conflicts: Ensure ports 4020 and 4021 are available
 File Permissions: Verify write permissions in log directory
 gRPC Issues: Check if Protocol Buffer compiler is installed
-Debug Mode
 
-Enable verbose logging for debugging:
 
-bash
-RUST_LOG=debug ./log_server
-Development
 
-Building from Source
-
-bash
-cargo build
-cargo test
-cargo run -- --help
-Protocol Definitions
-
-TCP: See protocols/capnp directory
-gRPC: See protocols/proto directory
-License
-
-[Your License Here]
-
-Contributing
-
-[Your Contribution Guidelines Here]
