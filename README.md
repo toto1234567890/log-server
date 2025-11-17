@@ -5,7 +5,7 @@ A high-performance log server that receives log messages from CLI loggers on the
 
 # Features
 
-Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021)
+*Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021)
 Protocol Flexibility: gRPC can be disabled with --only_tcp command line parameter
 Language Agnostic: Any programming language that supports TCP can send logs
 JavaScript Support: gRPC interface specifically designed for JavaScript logging
