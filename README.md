@@ -1,17 +1,18 @@
 
 # Log Server
 
-A high-performance log server that receives log messages from CLI loggers on the same machine via TCP and gRPC protocols, with file system storage and log rotation.
+A high-performance log server that receives log messages from CLI loggers on the same machine via TCP and gRPC protocols, <br>
+with file system storage and log rotation.
 
 # Features
 
-*Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021)
-Protocol Flexibility: gRPC can be disabled with --only_tcp command line parameter
-Language Agnostic: Any programming language that supports TCP can send logs
-JavaScript Support: gRPC interface specifically designed for JavaScript logging
-File Storage: Writes messages to file system with rotation
-Rotating Logs: Maintains 10 files of 10MB each
-Binary Protocols: Efficient message serialization using Cap'n Proto and Protocol Buffers
+Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021) <br>
+Protocol Flexibility: gRPC can be disabled with --only_tcp command line parameter <br>
+Language Agnostic: Any programming language that supports TCP can send logs <br>
+JavaScript Support: gRPC interface specifically designed for JavaScript logging <br>
+File Storage: Writes messages to file system with rotation <br>
+Rotating Logs: Maintains 10 files of 10MB each <br>
+Binary Protocols: Efficient message serialization using Cap'n Proto and Protocol Buffers <br>
 Architecture
 
 # Data Flow
@@ -24,14 +25,14 @@ Server Processing Layers
 
 # Client Interfaces
 
-TCP Clients: Binary protocol with length-prefixed Cap'n Proto messages
-gRPC Clients: HTTP/2 with Protocol Buffers serialization
-Protocol Handlers
+TCP Clients: Binary protocol with length-prefixed Cap'n Proto messages <br>
+gRPC Clients: HTTP/2 with Protocol Buffers serialization <br>
 
-TCP Handler with socket connections
-gRPC Handler with channel pool
-Protocol-specific parsers (capnp and proto)
-Core Processing
+Protocol Handlers <br>
+TCP Handler with socket connections <br>
+gRPC Handler with channel pool <br>
+Protocol-specific parsers (capnp and proto) <br>
+Core Processing <br>
 
 Sequencer using AtomicU64 for message ordering
 Unified processing pipeline
