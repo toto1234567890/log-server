@@ -6,22 +6,21 @@ with file system storage and log rotation.
 
 # Features
 
-Dual Protocol Support: Listen on both TCP (port 4020) and gRPC (port 4021) <br>
-Protocol Flexibility: gRPC can be disabled with --only_tcp command line parameter <br>
-Language Agnostic: Any programming language that supports TCP can send logs <br>
-JavaScript Support: gRPC interface specifically designed for JavaScript logging <br>
-File Storage: Writes messages to file system with rotation <br>
-Rotating Logs: Maintains 10 files of 10MB each <br>
-Binary Protocols: Efficient message serialization using Cap'n Proto and Protocol Buffers <br>
-Architecture
+Dual Protocol Support:     Listen on both TCP (port 4020) and gRPC (port 4021) <br>
+Protocol Flexibility:      gRPC can be disabled with --only_tcp command line parameter <br>
+Language Agnostic:         Any programming language that supports TCP can send logs <br>
+JavaScript Support:        gRPC interface specifically designed for JavaScript logging <br>
+File Storage:              Writes messages to file system with rotation <br>
+Rotating Logs:             Maintains 10 files of 10MB each <br>
+Binary Protocols:          Efficient message serialization using Cap'n Proto and Protocol Buffers <br>
+
 
 # Data Flow
 
-text
-TCP Clients (Binary/capnp) ───┐
-                              ├──▶ Log Server Core ───▶ File Writer ───▶ File System
-gRPC Clients (Protobuf) ──────┘
-Server Processing Layers
+TCP Clients (Binary/capnp) ───┐<br>
+                              ├──▶ Log Server Core ───▶ File Writer ───▶ File System<br>
+gRPC Clients (Protobuf) ──────┘<br>
+
 
 # Client Interfaces
 
@@ -34,15 +33,14 @@ gRPC Handler with channel pool <br>
 Protocol-specific parsers (capnp and proto) <br>
 Core Processing <br>
 
-Sequencer using AtomicU64 for message ordering
-Unified processing pipeline
-Storage Layer
+Sequencer using AtomicU64 for message ordering <br>
+Unified processing pipeline <br>
+Storage Layer <br>
 
-BTreeMap for sequence number ordering
-Dynamic batch writing
-Retry logic (3 attempts with delays)
-File system output with rotation
-Installation
+BTreeMap for sequence number ordering <br>
+Dynamic batch writing <br>
+Retry logic (3 attempts with delays) <br>
+File system output with rotation <br>
 
 # Prerequisites
 
@@ -54,11 +52,9 @@ bash
 git clone <repository-url>
 cd log_server
 cargo build --release
-Usage
 
 # Basic Usage
 
-bash
 ./log_server
 Command Line Options
 
@@ -71,64 +67,59 @@ Option	Description	Default Value
 
 # Examples
 
-Start with default settings:
+Start with default settings: <br>
+./log_server<br>
 
-bash
-./log_server
-Start with custom ports:
+Start with custom ports:<br>
+./log_server --port 5000 --grpc_port 5001<br>
 
-bash
-./log_server --port 5000 --grpc_port 5001
-Disable gRPC and use TCP only:
+Disable gRPC and use TCP only:<br>
+./log_server --tcp_only<br>
 
-bash
-./log_server --tcp_only
-Custom server name:
+Custom server name:<br>
+./log_server --name "MyLogServer"<br>
 
-bash
-./log_server --name "MyLogServer"
-Protocol Specifications
+Protocol Specifications <br>
 
-TCP Protocol
+TCP Protocol <br>
+Port: 4020 (configurable)<br>
+Format: Length-prefixed binary messages<br>
+Serialization: Cap'n Proto<br>
+Message Structure: [4-byte length][capnp message] (will be changed soon with a common socket object)<br>
 
-Port: 4020 (configurable)
-Format: Length-prefixed binary messages
-Serialization: Cap'n Proto
-Message Structure: [4-byte length][capnp message] (will be changed soon with a common socket object)
+gRPC Protocol<br>
 
-gRPC Protocol
+Port: 4021 (configurable)<br>
+Transport: HTTP/2<br>
+Serialization: Protocol Buffers<br>
+Service: Defined in .proto files<br>
 
-Port: 4021 (configurable)
-Transport: HTTP/2
-Serialization: Protocol Buffers
-Service: Defined in .proto files
-File Output
+File Output<br>
 
-Log File Structure
+Log File Structure<br>
 
-text
-_main.log      # Current active file
-_main.log.0    # Most recent rotated file
-_main.log.1    # Older rotated file
-...
-_main.log.9    # Oldest rotated file
+_main.log      # Current active file<br>
+_main.log.0    # Most recent rotated file<br>
+_main.log.1    # Older rotated file<br>
+...<br>
+_main.log.9    # Oldest rotated file<br>
 
-Rotation Policy
+Rotation Policy<br>
 
-File Size: 10MB per file
-File Count: 10 files maximum
-Rotation: When current file reaches 10MB
-Cleanup: Oldest files are deleted when rotation occurs
-Client Integration
+File Size: 10MB per file<br>
+File Count: 10 files maximum<br>
+Rotation: When current file reaches 10MB<br>
+Cleanup: Oldest files are deleted when rotation occurs<br>
 
-TCP Clients (Any Language)
+Client Integration<br>
 
-Example connection pattern:
+TCP Clients (Any Language)<br>
 
-Establish TCP connection to host:port
-Send length-prefixed Cap'n Proto messages
-Close connection when done
-gRPC Clients (JavaScript/TypeScript)
+Example connection pattern: <br>
+Establish TCP connection to host:port<br>
+Send length-prefixed Cap'n Proto messages<br>
+Close connection when done<br>
+gRPC Clients (JavaScript/TypeScript)<br>
 
 # Example using gRPC-Web:
 
