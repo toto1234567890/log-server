@@ -1,0 +1,289 @@
+Follow these STRICT Python coding rules:
+
+## FILE STRUCTURE & IMPORTS
+1. Each Rust file must represent one logical module or struct that can be:
+imported as part of a library (lib.rs)
+or run independently as a binary (main.rs or files in src/bin/).
+
+1.1 for multiple binary setup :
+src/
+├── lib/
+│   └── component.rs     // reusable module
+├── main.rs              // main binary
+└── bin/
+    └── component_standalone.rs // secondary binary
+
+
+2. File MUST start with:
+//! Module description / component purpose
+
+3. Import only required module element using format:
+   use folder::class::{element1, element2};
+
+## CLASS DEFINITION
+4. Class MUST have:
+   - comment for what does the class
+   - name class property initialized with class name
+   - instanciation with at least "config", "logger", name params + optional params  
+   - if name is empty fill with struct name
+
+5. Always use string formating method format!();
+
+6. self.logger methods MUST use a string which starts like "{} : .....", self.name) 
+
+## METHOD ORGANIZATION
+7. **Execution Flow Order**: Methods organized in logical calling sequence:
+   - instanciation and setup methods first
+   - Core public functionality next in calling order
+   - Query/getter methods grouped together
+   - Storage/update methods grouped together
+   - Internal helpers at the bottom in usage order
+
+8. **Private Method Rules**: Internal methods not for external use:
+   - Placed at the end of the class in usage order
+   - Names must start with `_` (underscore)
+   - Grouped by functionality (validation, helpers, formatters)
+
+8.1 use design pattern each times it's necessary : interface, compostion, factory...
+
+## MAIN EXECUTION
+9. Every binary (main.rs, or files in src/bin/) MUST start with:
+//================================================================
+fn main() {
+
+10. Main MUST accept these default CLI parameters:
+   "--name", "--host", "--port", "--conf", "--log_level"
+and use clap for parsing
+
+11. Always pass named parameters to function if possible
+
+12. If one module import is needed and conditional, import it where it is necessary
+
+13. **CRITICAL ERROR HANDLING RULES**:
+    - Use `logger.critical()` + `std::process::exit(1)` for **missing dependencies** and **unrecoverable infrastructure failures**
+    - Use `logger.error()` + return `False/None` for **operational failures** (connection issues, timeouts, data problems)
+    - Parents may `std::process::exit(1)` on truly critical errors that prevent basic functionality
+    - Children handle application-level decisions for operational errors
+
+14. always use date/time - UTC Timezone
+
+15. easy code reading : add "        #-----------------------------------------------------------------------------------------------" betweeen methods in class  
+
+16. use idiomatic return patterns "Result : success | error" for execution and "None" for data (if no data)
+
+## EXAMPLE TEMPLATE:
+//! Example struct demonstrating Rust coding standards
+//!
+//! should follow the prompt rules
+//! imported as part of a library or run standalone as a binary.
+
+use std::collections::HashMap;
+
+//-----------------------------------------------------------------------------------------------
+/// Example struct following project standards
+pub struct ExampleStruct {
+    name: String,
+    config: std::sync::Arc<crate::common::config::Config>,
+    logger: std::sync::Arc<crate::common::logger::Logger>,
+}
+
+//-----------------------------------------------------------------------------------------------
+impl ExampleStruct {
+    /// Create new instance with config, logger, and optional name
+    pub fn new(
+        config: std::sync::Arc<crate::common::config::Config>,
+        logger: std::sync::Arc<crate::common::logger::Logger>,
+        name: String,
+    ) -> Self {
+        let instance = Self {
+            name: if name.is_empty() { "ExampleStruct".to_string() } else { name },
+            config,
+            logger,
+        };
+        
+        instance._setup_internal_state();
+        instance
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    // Core public methods in calling sequence
+    
+    /// Main processing method
+    pub fn process_data(&self, data: &HashMap<String, String>) -> Result<bool, String> {
+        self.logger.info(&format!("{} : processing data", self.name));
+        
+        if !self._validate_input(data) {
+            return Err("validation failed".to_string());
+        }
+        
+        let result = self._transform_data(data);
+        self._store_result(&result)
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Query method
+    pub fn get_results(&self, query: &str) -> Option<Vec<HashMap<String, String>>> {
+        self.logger.debug(&format!("{} : executing query", self.name));
+        
+        let results = self._execute_query(query);
+        if results.is_empty() {
+            None
+        } else {
+            Some(results)
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Critical operation with proper error handling
+    pub fn critical_operation(&self) -> Result<(), String> {
+        // CRITICAL: Missing dependency - exit process
+        if !self._check_system_dependency() {
+            self.logger.critical(&format!("{} : system dependency missing", self.name));
+            std::process::exit(1);
+        }
+        
+        // OPERATIONAL: Runtime failure - return error
+        match self._perform_operation() {
+            Ok(_) => {
+                self.logger.info(&format!("{} : operation successful", self.name));
+                Ok(())
+            }
+            Err(e) => {
+                self.logger.error(&format!("{} : operation failed - {}", self.name, e));
+                Err(e)
+            }
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Conditional module usage example
+    pub fn specific_module_import(&self, use_feature: bool) -> Result<bool, String> {
+        if use_feature {
+            // Conditional compilation or feature-based logic
+            #[cfg(feature = "advanced")]
+            {
+                use crate::advanced::processor::AdvancedProcessor;
+                let processor = AdvancedProcessor::new();
+                processor.process()
+            }
+            #[cfg(not(feature = "advanced"))]
+            {
+                Err("advanced feature not available".to_string())
+            }
+        } else {
+            Ok(true)
+        }
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    // Internal private methods at bottom
+    
+    /// Setup internal state
+    fn _setup_internal_state(&self) {
+        self.logger.debug(&format!("{} : setting up internal state", self.name));
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Validate input data
+    fn _validate_input(&self, data: &HashMap<String, String>) -> bool {
+        !data.is_empty()
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Transform data
+    fn _transform_data(&self, data: &HashMap<String, String>) -> HashMap<String, String> {
+        data.iter()
+            .map(|(k, v)| (k.to_uppercase(), v.clone()))
+            .collect()
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Store result
+    fn _store_result(&self, _result: &HashMap<String, String>) -> Result<bool, String> {
+        Ok(true)
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Execute query
+    fn _execute_query(&self, _query: &str) -> Vec<HashMap<String, String>> {
+        vec![]
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Check system dependency
+    fn _check_system_dependency(&self) -> bool {
+        // Check for required system components
+        true
+    }
+    
+    //-----------------------------------------------------------------------------------------------
+    
+    /// Perform operation that may fail
+    fn _perform_operation(&self) -> Result<(), String> {
+        // Operation logic here
+        Ok(())
+    }
+}
+
+//================================================================
+// Binary execution section
+//================================================================
+
+fn main() {
+    use clap::{Arg, Command};
+    
+    let matches = Command::new("example_struct")
+        .arg(Arg::new("name")
+            .long("name")
+            .default_value("ExampleStruct"))
+        .arg(Arg::new("host")
+            .long("host")
+            .default_value("localhost"))
+        .arg(Arg::new("port")
+            .long("port")
+            .default_value("8000"))
+        .arg(Arg::new("conf")
+            .long("conf")
+            .default_value("config.yaml"))
+        .arg(Arg::new("log_level")
+            .long("log_level")
+            .default_value("INFO"))
+        .get_matches();
+    
+    let name = matches.get_one::<String>("name").unwrap();
+    
+    // Example usage
+    let logger = crate::common::logger::Logger::new(name.clone());
+    logger.info(&format!("{} started", name));
+}
+
+STRICTLY follow ALL these rules in your Rust code.
+
+if needed use it, infer what should be in or add folder to the project structure:
+[project-name]/
+├── 📁 src/
+│ ├── 📁 common/   # common (config, logger, init_logger)
+│ ├── 📁 models/   # Data models
+│ ├── 📁 handlers/ # HTTP handlers
+│ ├── 📁 data/     # Data storage
+│ ├── 📁 utils/    # Project utilities
+│ └── 📁 bin/      # Standalone binaries (Rust project only)
+├── 📁 lib/         # Shared common library
+├── 📁 tests/       # unit tests and mock
+├── 📁 cmd/         # Standalone Go utilities (Go project only)
+├── 📁 bin/         # Compiled binaries
+├── 📁 scripts/     # Build scripts
+└── 📁 config/      # Configuration files
+
+
+keep in mind that I'm a solo developer developping micro-service projects, this should be "KISS", standard and maintainable while keeping this coding structure and style
+
+just keep this in memory for all chat and just reply ok, in memory for next requests
